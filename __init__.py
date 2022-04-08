@@ -1,191 +1,46 @@
-
+# ##### BEGIN GPL LICENSE BLOCK #####
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software Foundation,
+#  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+#
+# ##### END GPL LICENSE BLOCK #####
 
 bl_info = {
-    "name": "Kaedim 3D Artist Utilities",
-    "author": "Chris Kinch - Kaedim",
-    "version": (1, 3),
-    "blender": (2, 93, 4),
-    "location": "View3D > Toolbar(N) > Kaedim Exporter",
-    "description": "Tools to make.",
-    "warning": "",
-    "wiki_url": "",
-    "category": "Export"
+	"name": "Addon Updater Demo",
+	"description": "Demo addon for showcasing the blender-addon-updater module",
+	"author": "Patrick W. Crawford, neomonkeus",
+	"version": (1, 1, 0),
+	"blender": (3, 1, 0),
+	"location": "View 3D > Tool Shelf > Demo Updater",
+	"warning": "",
+	"wiki_url": "https://github.com/CGCookie/blender-addon-updater",
+	"tracker_url": "https://github.com/CGCookie/blender-addon-updater/issues",
+	"category": "System"
 }
-import bpy
-import os
-import glob
-import os.path
-from bpy.props import (StringProperty, BoolProperty, PointerProperty)
-from bpy.types import (Panel, Operator, AddonPreferences, PropertyGroup)
 
-class Settings(PropertyGroup):
-    obj_bool: BoolProperty(
-        name= "Enable or Disable",
-        description= "Export as .obj",
-        default= False)
-    fbx_bool: BoolProperty(
-        name= "Enable or Disable",
-        description= "Export as .fbx",
-        default= False)
-    glb_bool: BoolProperty(
-        name= "Enable or Disable",
-        description= "Export as .glb",
-        default= False)
-    gltf_bool: BoolProperty(
-        name= "Enable or Disable",
-        description= "Export as glTF",
-        default= False)
-    file_path: StringProperty(
-        name="Export To",
-        description="Export location",
-        default="",
-        maxlen=1024,
-        subtype="FILE_PATH")
-    import_file_path: StringProperty(
-        name="Import From",
-        description="Folder to look for reference image.",
-        default="",
-        maxlen=1024,
-        subtype="FILE_PATH")
+from . import kaedimexporter
+from . import addon_constructor
 
-class ExportFunction(Operator):
-    bl_idname = "object.export_operator"
-    bl_label = "Simple Object Operator"
 
-    def execute(self, context):
-        files_to_export = []
-        gltf_formats = []
-        
-        if len(bpy.context.selected_objects) <1:
-            raise Exception("No objects selected for export. Please make a selection before clicking EXPORT.")
-
-        if context.scene.my_tool.obj_bool == True:
-            files_to_export.append("obj")
-            
-        if context.scene.my_tool.fbx_bool == True:
-            files_to_export.append("fbx")
-
-        if context.scene.my_tool.gltf_bool == True:
-            files_to_export.append("gltf")
-            gltf_formats.append("GLTF_EMBEDDED")
-
-        if context.scene.my_tool.glb_bool == True:
-            if "gltf" not in files_to_export:
-                files_to_export.append("gltf")
-            gltf_formats.append("GLB")
-        
-        path = context.scene.my_tool.file_path
-        folder_path = bpy.path.abspath(path)
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-
-        for type in files_to_export:
-            if type == "obj":
-                bpy.ops.export_scene.obj(
-                    filepath=os.path.join(folder_path, context.active_object.name + ".obj"),
-                    use_selection=True
-                    )
-            elif type == "fbx":
-                bpy.ops.export_scene.fbx(
-                    filepath=os.path.join(folder_path, context.active_object.name + ".fbx"),
-                    use_selection=True
-                    )
-            else:
-                for format in gltf_formats:
-                    bpy.ops.export_scene.gltf(
-                        filepath=os.path.join(folder_path, context.active_object.name + ".gltf"),
-                        use_selection=True,
-                        export_format = format
-                        )
-        return {'FINISHED'}
-
-class ImportFunction(Operator):
-    bl_idname = "object.import_operator"
-    bl_label = "Imports Reference Image"
-
-    def execute(self, context):
-        
-        for area in bpy.context.screen.areas:
-            if area.type == 'VIEW_3D':
-                override = bpy.context.copy()
-                override['area'] = area
-                bpy.ops.view3d.view_axis(override, type='FRONT')
-                break
-    
-        path = context.scene.my_tool.import_file_path
-        folder_path = bpy.path.abspath(path)
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-
-        types = ('*jpeg', '*png') # the tuple of file types
-        files = []
-        for type in types:
-            files.extend(glob.glob(folder_path + type))
-            
-        max_file = max(files, key=os.path.getctime)
-        bpy.ops.object.load_reference_image(filepath=max_file)
-
-        return {'FINISHED'}
-
-class ExportPanel(bpy.types.Panel):
-    bl_label = "Exporter"
-    bl_idname = "PT_TestPanel"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = "Kaedim Export"
-    
-    def draw(self, context):
-        layout = self.layout
-        scene = context.scene
-        mytool = scene.my_tool
-        
-        row = layout.row()
-        row.label(text = "Select file types:", icon= "CHECKMARK")
-        row = layout.row()
-        row.prop(mytool, "obj_bool", text=".obj")
-        row.prop(mytool, "fbx_bool", text=".fbx")
-        row = layout.row()
-        row.prop(mytool, "glb_bool", text=".glb")
-        row.prop(mytool, "gltf_bool", text=".glTF")
-        row = layout.row()
-        row.label(text = "Specify file path:", icon= "FILEBROWSER")
-        row = layout.row()
-        row.prop(mytool, "file_path")
-        row = layout.row()
-        row.operator(ExportFunction.bl_idname, text="EXPORT", icon="CONSOLE")
-        
-class ImportPanel(bpy.types.Panel):
-    bl_label = "Reference Import"
-    bl_idname = "Ref_Import"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = "Kaedim Export"
-    
-    def draw(self, context):
-        layout = self.layout
-        scene = context.scene
-        mytool = scene.my_tool
-        
-        row = layout.row()
-        row.label(text = "Specify file path:", icon= "FILEBROWSER")
-        row = layout.row()
-        row.prop(mytool, "import_file_path")
-        row = layout.row()
-        row.operator(ImportFunction.bl_idname, text="IMPORT", icon="CONSOLE")
-
-classes = (Settings, ImportPanel, ExportPanel, ImportFunction, ExportFunction)
-     
 def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
-        
-    bpy.types.Scene.my_tool = PointerProperty(type= Settings)
-    
+    print('')
+    #kaedimexporter.register()
+    #addon_constructor.register()
+
+
 def unregister():
-    for cls in classes:
-        bpy.utils.unregister_class(cls)
-        
-    del bpy.types.Scene.my_tool
-    
-if __name__ == "__main__":
-    register()
+    print('')
+    #kaedimexporter.unregister()
+    #addon_constructor.unregister()
+
