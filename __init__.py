@@ -34,13 +34,12 @@ from . import addon_constructor
 
 
 def register():
-    print('')
-    #kaedimexporter.register()
-    #addon_constructor.register()
+    kaedimexporter.register()
+    addon_constructor.register()
 
 
 def unregister():
-    print('')
-    #kaedimexporter.unregister()
-    #addon_constructor.unregister()
+    kaedimexporter.unregister()
+    addon_constructor.unregister()
 
+    
