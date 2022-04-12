@@ -12,13 +12,5 @@ v1.3:
 v1.3.1:
 - Import reference feature now looks for both .jpeg and .png files in the designated directory.
 
-V1.3.2:
-- Fixed issue that stopped import of .jpeg reference images if they were saved as .jpg
 
-V1.4:
-- Added ability to embed image texture files into the FBX binary file.
-- Now recalculates normals upon export for all selected objects
-
-V1.7:
-- Automatically selects and deletes loose edges upon export. This is to prevent the wireframe bug from occurring in threejs.
-- Uploaded the plugin to github and added a module that checks for updates once a day and downloads them after user confirmation.
+When updating version make sure to edit addon_constructor.py line 22, kaedimexpoorter.py line 4 and addon_updater.py line 25
