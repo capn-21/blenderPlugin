@@ -1,3 +1,8 @@
+To install the plugin for the first time start by downloading the zip of the latest release.
+Open Blender navigate to Edit tab and select Preferences, choose the Add-ons tab and Click install.
+Find the .zip you downloaded from github and install it (it should appear under the add-ons). 
+Make sure to enable it and then expand it to enable the automated check for updates as well.
+
 Kaedim Exporter Change Log
 
 v1.1:
@@ -14,5 +19,9 @@ v1.3.1:
 
 v1.3.2:
 - Fixed issue that stopped import of .jpeg reference images if they were saved as .jpg
+
+v1.4.0:
+- Added ability to embed image texture files into the FBX binary file.
+- Now recalculates normals upon export for all selected objects
 
 When updating version make sure to edit addon_constructor.py line 22, kaedimexpoorter.py line 4 and addon_updater.py line 25
