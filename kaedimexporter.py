@@ -1,9 +1,8 @@
-
 bl_info = {
     "name": "Kaedim 3D Artist Utilities",
     "author": "Chris Kinch - Kaedim",
-    "version": (1, 3),
-    "blender": (2, 93, 4),
+    "version": (1, 4),
+    "blender": (3, 1, 0),
     "location": "View3D > Toolbar(N) > Kaedim Exporter",
     "description": "Tools to make.",
     "warning": "",
@@ -17,8 +16,6 @@ import glob
 import os.path
 from bpy.props import (StringProperty, BoolProperty, PointerProperty)
 from bpy.types import (Panel, Operator, AddonPreferences, PropertyGroup)
-
-
 
 class Settings(PropertyGroup):
     obj_bool: BoolProperty(
@@ -36,6 +33,10 @@ class Settings(PropertyGroup):
     gltf_bool: BoolProperty(
         name= "Enable or Disable",
         description= "Export as glTF",
+        default= False)
+    embed_textures_bool: BoolProperty(
+        name= "Enable or Disable",
+        description= "Set Path Mode to 'Copy' and embed textures in fbx binary file",
         default= False)
     file_path: StringProperty(
         name="Export To",
@@ -60,6 +61,11 @@ class ExportFunction(Operator):
         
         if len(bpy.context.selected_objects) <1:
             raise Exception("No objects selected for export. Please make a selection before clicking EXPORT.")
+        
+        bpy.ops.object.editmode_toggle()
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.normals_make_consistent(inside=False)
+        bpy.ops.object.editmode_toggle()
 
         if context.scene.my_tool.obj_bool == True:
             files_to_export.append("obj")
@@ -88,10 +94,16 @@ class ExportFunction(Operator):
                     use_selection=True
                     )
             elif type == "fbx":
-                bpy.ops.export_scene.fbx(
-                    filepath=os.path.join(folder_path, context.active_object.name + ".fbx"),
-                    use_selection=True
-                    )
+                if context.scene.my_tool.embed_textures_bool == True:
+                    bpy.ops.export_scene.fbx(
+                        filepath=os.path.join(folder_path, context.active_object.name + ".fbx"),
+                        use_selection=True, path_mode='COPY', embed_textures=True
+                        )
+                else:
+                    bpy.ops.export_scene.fbx(
+                        filepath=os.path.join(folder_path, context.active_object.name + ".fbx"),
+                        use_selection=True, path_mode='AUTO', embed_textures=False
+                        )
             else:
                 for format in gltf_formats:
                     bpy.ops.export_scene.gltf(
@@ -119,7 +131,7 @@ class ImportFunction(Operator):
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
-        types = ('*jpeg', '*png') # the tuple of file types
+        types = ('*jpg', '*jpeg', '*png') # the tuple of file types
         files = []
         for type in types:
             files.extend(glob.glob(folder_path + type))
@@ -141,6 +153,10 @@ class ExportPanel(bpy.types.Panel):
         scene = context.scene
         mytool = scene.my_tool
         
+        row = layout.row()
+        row.label(text = "FBX Embed Texture:", icon= "TEXTURE")
+        row = layout.row()
+        row.prop(mytool, "embed_textures_bool", text="Embed")
         row = layout.row()
         row.label(text = "Select file types:", icon= "CHECKMARK")
         row = layout.row()
@@ -188,3 +204,4 @@ def unregister():
         bpy.utils.unregister_class(cls)
         
     del bpy.types.Scene.my_tool
+    
