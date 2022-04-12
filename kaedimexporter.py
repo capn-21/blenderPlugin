@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Kaedim 3D Artist Utilities",
     "author": "Chris Kinch - Kaedim",
-    "version": (1, 4, 0),
+    "version": (1, 4, 1),
     "blender": (3, 1, 0),
     "location": "View3D > Toolbar(N) > Kaedim Exporter",
     "description": "Tools to make.",
@@ -63,6 +63,9 @@ class ExportFunction(Operator):
             raise Exception("No objects selected for export. Please make a selection before clicking EXPORT.")
         
         bpy.ops.object.editmode_toggle()
+        bpy.context.tool_settings.mesh_select_mode = (False, True, False)
+        bpy.ops.mesh.select_loose()
+        bpy.ops.mesh.delete(type='EDGE')
         bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.normals_make_consistent(inside=False)
         bpy.ops.object.editmode_toggle()
@@ -204,4 +207,3 @@ def unregister():
         bpy.utils.unregister_class(cls)
         
     del bpy.types.Scene.my_tool
-    

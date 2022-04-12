@@ -24,4 +24,8 @@ v1.4.0:
 - Added ability to embed image texture files into the FBX binary file.
 - Now recalculates normals upon export for all selected objects
 
+v1.4.1:
+- Automatically selects and deletes loose edges upon export. This is to prevent the wireframe bug from occurring in threejs.
+
+
 When updating version make sure to edit addon_constructor.py line 22, kaedimexpoorter.py line 4 and addon_updater.py line 25

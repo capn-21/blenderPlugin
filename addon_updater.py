@@ -22,7 +22,7 @@ See documentation for usage
 https://github.com/CGCookie/blender-addon-updater
 """
 
-__version__ = "1.4.0"
+__version__ = "1.4.1"
 
 import errno
 import traceback
