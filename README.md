@@ -12,5 +12,7 @@ v1.3:
 v1.3.1:
 - Import reference feature now looks for both .jpeg and .png files in the designated directory.
 
+v1.3.2:
+- Fixed issue that stopped import of .jpeg reference images if they were saved as .jpg
 
 When updating version make sure to edit addon_constructor.py line 22, kaedimexpoorter.py line 4 and addon_updater.py line 25

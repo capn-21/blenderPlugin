@@ -1,8 +1,8 @@
 bl_info = {
     "name": "Kaedim 3D Artist Utilities",
     "author": "Chris Kinch - Kaedim",
-    "version": (1, 3, 1),
-    "blender": (2, 93, 4),
+    "version": (1, 3, 2),
+    "blender": (3, 1, 0),
     "location": "View3D > Toolbar(N) > Kaedim Exporter",
     "description": "Tools to make.",
     "warning": "",
@@ -116,7 +116,7 @@ class ImportFunction(Operator):
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
-        types = ('*jpeg', '*png') # the tuple of file types
+        types = ('*jpg', '*jpeg', '*png') # the tuple of file types
         files = []
         for type in types:
             files.extend(glob.glob(folder_path + type))
@@ -185,4 +185,3 @@ def unregister():
         bpy.utils.unregister_class(cls)
         
     del bpy.types.Scene.my_tool
-    
