@@ -42,7 +42,7 @@ class DemoUpdaterPanel(bpy.types.Panel):
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'TOOLS' if bpy.app.version < (2, 80) else 'UI'
 	bl_context = "objectmode"
-	bl_category = "Tools"
+	bl_category = "Updater"
 
 	def draw(self, context):
 		layout = self.layout
