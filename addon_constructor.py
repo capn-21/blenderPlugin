@@ -19,7 +19,7 @@
 bl_info = {
 	 "name": "Kaedim Blender Plugins",
     "author": "Kaedim",
-    "version": (1, 4, 1),
+    "version": (1, 4, 2),
     "blender": (3, 1, 0),
     "location": "View3D > Toolbar(N) > Kaedim Exporter",
     "description": "Tools to make.",

@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Kaedim 3D Artist Utilities",
-    "author": "Chris Kinch - Kaedim",
-    "version": (1, 4, 1),
+    "author": "Kaedim",
+    "version": (1, 4, 2),
     "blender": (3, 1, 0),
     "location": "View3D > Toolbar(N) > Kaedim Exporter",
     "description": "Tools to make.",
@@ -38,6 +38,10 @@ class Settings(PropertyGroup):
         name= "Enable or Disable",
         description= "Set Path Mode to 'Copy' and embed textures in fbx binary file",
         default= False)
+    normals_bool: BoolProperty(
+        name= "Enable or Disable",
+        description= "Automatically recalculates normals upon export",
+        default= False)
     file_path: StringProperty(
         name="Export To",
         description="Export location",
@@ -66,9 +70,13 @@ class ExportFunction(Operator):
         bpy.context.tool_settings.mesh_select_mode = (False, True, False)
         bpy.ops.mesh.select_loose()
         bpy.ops.mesh.delete(type='EDGE')
-        bpy.ops.mesh.select_all(action='SELECT')
-        bpy.ops.mesh.normals_make_consistent(inside=False)
         bpy.ops.object.editmode_toggle()
+        
+        if context.scene.my_tool.normals_bool == True:
+            bpy.ops.object.editmode_toggle()
+            bpy.ops.mesh.select_all(action='SELECT')
+            bpy.ops.mesh.normals_make_consistent(inside=False)
+            bpy.ops.object.editmode_toggle()
 
         if context.scene.my_tool.obj_bool == True:
             files_to_export.append("obj")
@@ -157,9 +165,11 @@ class ExportPanel(bpy.types.Panel):
         mytool = scene.my_tool
         
         row = layout.row()
-        row.label(text = "FBX Embed Texture:", icon= "TEXTURE")
+        row.label(text = "Extras:", icon= "TEXTURE")
         row = layout.row()
-        row.prop(mytool, "embed_textures_bool", text="Embed")
+        row.prop(mytool, "embed_textures_bool", text="Embed FBX Texture")
+        row = layout.row()
+        row.prop(mytool, "normals_bool", text="Recalculate Normals")
         row = layout.row()
         row.label(text = "Select file types:", icon= "CHECKMARK")
         row = layout.row()
