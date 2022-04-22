@@ -43,5 +43,6 @@ v1.4.3:
 
 - Added hard constraints for model watertightness 
 - Fixed FBX scaling problem
+- All checked  by default
 
 When updating version make sure to edit addon_constructor.py line 22, kaedimexpoorter.py line 4 and addon_updater.py line 25

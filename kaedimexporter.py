@@ -38,19 +38,19 @@ class Settings(PropertyGroup):
     obj_bool: BoolProperty(
         name= "Enable or Disable",
         description= "Export as .obj",
-        default= False)
+        default= True)
     fbx_bool: BoolProperty(
         name= "Enable or Disable",
         description= "Export as .fbx",
-        default= False)
+        default= True)
     glb_bool: BoolProperty(
         name= "Enable or Disable",
         description= "Export as .glb",
-        default= False)
+        default= True)
     gltf_bool: BoolProperty(
         name= "Enable or Disable",
         description= "Export as glTF",
-        default= False)
+        default= True)
     embed_textures_bool: BoolProperty(
         name= "Enable or Disable",
         description= "Set Path Mode to 'Copy' and embed textures in fbx binary file",
