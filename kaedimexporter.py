@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Kaedim 3D Artist Utilities",
     "author": "Kaedim",
-    "version": (1, 4, 2),
+    "version": (1, 4, 3),
     "blender": (3, 1, 0),
     "location": "View3D > Toolbar(N) > Kaedim Exporter",
     "description": "Tools to make.",
@@ -16,6 +16,23 @@ import glob
 import os.path
 from bpy.props import (StringProperty, BoolProperty, PointerProperty)
 from bpy.types import (Panel, Operator, AddonPreferences, PropertyGroup)
+
+def checkWatertight():
+    watertight=False
+    edit=False
+    if bpy.context.active_object.mode != 'EDIT':
+        edit=True
+        bpy.ops.object.editmode_toggle()
+    bpy.ops.mesh.select_mode(type="VERT")
+    bpy.ops.mesh.select_non_manifold(extend=False, use_wire=True, use_boundary=True, use_multi_face=False, use_non_contiguous=False, use_verts=True)
+    selectedEdges = [e for e in bpy.context.active_object.data.edges if e.select]
+    print(len(selectedEdges))
+    if(len(selectedEdges)>0):
+        watertight=True
+    if edit:
+        bpy.ops.object.editmode_toggle()
+    return watertight
+
 
 class Settings(PropertyGroup):
     obj_bool: BoolProperty(
@@ -58,13 +75,20 @@ class Settings(PropertyGroup):
 class ExportFunction(Operator):
     bl_idname = "object.export_operator"
     bl_label = "Simple Object Operator"
-
+    
     def execute(self, context):
         files_to_export = []
         gltf_formats = []
         
         if len(bpy.context.selected_objects) <1:
             raise Exception("No objects selected for export. Please make a selection before clicking EXPORT.")
+        
+        print("-"*30)
+        checkWatertight()
+        if checkWatertight():
+            raise Exception("Not Watertight")
+        print("-"*30)
+        
         
         bpy.ops.object.editmode_toggle()
         bpy.context.tool_settings.mesh_select_mode = (False, True, False)
@@ -108,12 +132,12 @@ class ExportFunction(Operator):
                 if context.scene.my_tool.embed_textures_bool == True:
                     bpy.ops.export_scene.fbx(
                         filepath=os.path.join(folder_path, context.active_object.name + ".fbx"),
-                        use_selection=True, path_mode='COPY', embed_textures=True
+                        use_selection=True, path_mode='COPY', embed_textures=True, global_scale=0.01,
                         )
                 else:
                     bpy.ops.export_scene.fbx(
                         filepath=os.path.join(folder_path, context.active_object.name + ".fbx"),
-                        use_selection=True, path_mode='AUTO', embed_textures=False
+                        use_selection=True, path_mode='AUTO', embed_textures=False, global_scale=0.01,
                         )
             else:
                 for format in gltf_formats:
@@ -204,7 +228,60 @@ class ImportPanel(bpy.types.Panel):
         row = layout.row()
         row.operator(ImportFunction.bl_idname, text="IMPORT", icon="CONSOLE")
 
-classes = (Settings, ImportPanel, ExportPanel, ImportFunction, ExportFunction)
+class WaterTightPanel(bpy.types.Panel):
+    bl_label = "water tight"
+    bl_idname = "water tight_id"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = 'Watertight'
+
+    def draw(self, context):
+        layout = self.layout
+
+        row = layout.row()
+        row.label(text="Water tight ", icon="OUTLINER_OB_FORCE_FIELD")
+        row = layout.row()
+
+
+        row.operator('watertight.operator', text="fill gaps")
+        row = layout.row()
+
+class Watertight(bpy.types.Operator):
+    bl_label = "l1"
+    bl_idname = 'watertight.operator'
+
+    def execute(self, context):
+
+        bpy.ops.object.editmode_toggle()
+        bpy.ops.mesh.select_mode(type='VERT')
+        bpy.ops.mesh.reveal()
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.delete_loose(use_verts=True, use_edges=True, use_faces=True)
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.mesh.select_interior_faces()
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.remove_doubles(threshold=0.0001)
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.dissolve_degenerate(threshold=0.0001)
+        bpy.ops.mesh.select_non_manifold(extend=False, use_wire=True, use_boundary=True,        use_multi_face=False,                  use_non_contiguous=False, use_verts=True)
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.fill_holes(sides=0)
+        bpy.ops.mesh.select_non_manifold(extend=False, use_wire=True, use_boundary=False,       use_multi_face=False,                  use_non_contiguous=False, use_verts=True)
+        bpy.ops.mesh.delete(type='VERT')
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.fill_holes(sides=0)
+        bpy.ops.mesh.select_non_manifold(extend=False, use_wire=True, use_boundary=False,       use_multi_face=False,                  use_non_contiguous=False, use_verts=True)
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.fill_holes(sides=0)
+        bpy.ops.mesh.select_non_manifold(extend=False, use_wire=True, use_boundary=False,       use_multi_face=False,                  use_non_contiguous=False, use_verts=True)
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.normals_make_consistent()
+        bpy.ops.object.editmode_toggle()
+        bpy.ops.mesh.print3d_clean_non_manifold()
+       
+        return {'FINISHED'}
+
+classes = (Settings, ImportPanel, ExportPanel, ImportFunction, ExportFunction, WaterTightPanel, Watertight)
      
 def register():
     for cls in classes:

@@ -39,4 +39,9 @@ v1.4.2:
 - Normals recalculation can now be toggled via checkbox in Extras
 - FBX texture packing option moved to Extras
 
+v1.4.3:
+
+- Added hard constraints for model watertightness 
+- Fixed FBX scaling problem
+
 When updating version make sure to edit addon_constructor.py line 22, kaedimexpoorter.py line 4 and addon_updater.py line 25
