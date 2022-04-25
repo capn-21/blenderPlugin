@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Kaedim 3D Artist Utilities",
     "author": "Kaedim",
-    "version": (1, 4, 3),
+    "version": (1, 4, 4),
     "blender": (3, 1, 0),
     "location": "View3D > Toolbar(N) > Kaedim Exporter",
     "description": "Tools to make.",
@@ -86,7 +86,9 @@ class ExportFunction(Operator):
         print("-"*30)
         checkWatertight()
         if checkWatertight():
+            bpy.context.space_data.overlay.show_face_orientation = True
             raise Exception("Not Watertight")
+
         print("-"*30)
         
         
@@ -233,7 +235,7 @@ class WaterTightPanel(bpy.types.Panel):
     bl_idname = "water tight_id"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = 'Watertight'
+    bl_category = 'Kaedim Export'
 
     def draw(self, context):
         layout = self.layout
@@ -281,7 +283,92 @@ class Watertight(bpy.types.Operator):
        
         return {'FINISHED'}
 
-classes = (Settings, ImportPanel, ExportPanel, ImportFunction, ExportFunction, WaterTightPanel, Watertight)
+
+class deimate_panel(bpy.types.Panel):
+    bl_label = "Quick Decimater"
+    bl_idname = "decimate_id"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = 'Kaedim Export'
+
+    def draw(self, context):
+        layout = self.layout
+
+        row = layout.row()
+        row.label(text="Quick decimate", icon="SEQ_HISTOGRAM")
+        row = layout.row()
+
+
+        row.operator('deci.operator_1', text="Decimate 50%")
+        row = layout.row()
+        row.operator('deci.operator_2', text="Decimate 65%")
+        row = layout.row()
+        row.operator('deci.operator_3', text="Decimate 80%")
+        row = layout.row()
+        row.operator('deci.apply', text="Apply")
+        row.operator('deci.clear', text="Clear")
+
+
+# operator for level 1 decimation
+class level1(bpy.types.Operator):
+    bl_label = "l1"
+    bl_idname = 'deci.operator_1'
+
+    def execute(self, context):
+        bpy.ops.object.modifier_add(type='DECIMATE')
+        bpy.context.object.modifiers["Decimate"].decimate_type = 'UNSUBDIV'
+        bpy.context.object.modifiers["Decimate"].iterations = 1
+
+        return {'FINISHED'}
+
+
+# operator for level 2 decimation
+class level2(bpy.types.Operator):
+    bl_label = "l2"
+    bl_idname = 'deci.operator_2'
+
+    def execute(self, context):
+        bpy.ops.object.modifier_add(type='DECIMATE')
+        bpy.context.object.modifiers["Decimate"].decimate_type = 'UNSUBDIV'
+        bpy.context.object.modifiers["Decimate"].iterations = 2
+
+        return {'FINISHED'}
+
+# operator for level 2 decimation
+class level3(bpy.types.Operator):
+    bl_label = "l3"
+    bl_idname = 'deci.operator_3'
+
+    def execute(self, context):
+        bpy.ops.object.modifier_add(type='DECIMATE')
+        bpy.context.object.modifiers["Decimate"].decimate_type = 'UNSUBDIV'
+        bpy.context.object.modifiers["Decimate"].iterations = 3
+
+        return {'FINISHED'}
+
+#apply mod operator
+class apply(bpy.types.Operator):
+    bl_label="apply"
+    bl_idname='deci.apply'
+
+    def execute(self,context):
+        bpy.ops.object.apply_all_modifiers()
+
+
+        return {'FINISHED'}
+
+#clear mod operator
+class clear(bpy.types.Operator):
+    bl_label = "clear"
+    bl_idname = 'deci.clear'
+
+    def execute(self, context):
+        bpy.ops.object.delete_all_modifiers()
+
+        return {'FINISHED'}
+
+
+classes = (Settings, ImportPanel, ExportPanel, ImportFunction, ExportFunction, WaterTightPanel, Watertight,deimate_panel,level1,level2,level3,apply,clear)
      
 def register():
     for cls in classes:

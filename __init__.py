@@ -20,7 +20,7 @@ bl_info = {
 	"name": "Addon Updater Demo",
 	"description": "Demo addon for showcasing the blender-addon-updater module",
 	"author": "Patrick W. Crawford, neomonkeus",
-	"version": (1, 4, 3),
+	"version": (1, 4, 4),
 	"blender": (3, 1, 0),
 	"location": "View 3D > Tool Shelf > Demo Updater",
 	"warning": "",
